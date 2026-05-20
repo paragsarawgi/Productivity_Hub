@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- This tells mobile browsers to NOT zoom out and show the full desktop site.
+         Without this, your responsive CSS would be ignored on phones. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Hub</title>
+    <!-- Linking our external stylesheet. Keeps HTML clean — no inline styles ever. -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ============================================================
+         HEADER / NAVBAR
+         Fixed at top. Contains logo, hamburger button, and nav links.
+         The hamburger button is HIDDEN on desktop, shown on mobile.
+    ============================================================ -->
+    <header>
+        <nav id="navbar">
+
+            <!-- Logo / Brand Name -->
+            <div id="logo">Productivity Hub</div>
+
+            <!-- Hamburger menu button.
+                 aria-label: tells screen readers what this button does (accessibility).
+                 aria-expanded: tells screen readers if the menu is open or closed.
+                 JavaScript will toggle aria-expanded between "true" and "false". -->
+            <button id="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <!-- Three spans = three lines of the hamburger icon.
+                     CSS animates these into an X when the menu opens. -->
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- Navigation links.
+                 On desktop: shown as a horizontal row.
+                 On mobile: hidden by default, shown when hamburger is clicked. -->
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <!-- These two get IDs so JS can animate them when "Get Started" is clicked -->
+                <a href="#to-do" id="todo-link">To-Do</a>
+                <a href="#planner" id="planner-link">Planner</a>
+                <a href="#">Contact Us</a>
+            </div>
+
+        </nav>
+    </header>
+
+
+    <!-- ============================================================
+         MAIN CONTENT
+         All sections live here. Each section is full-height (100vh).
+    ============================================================ -->
+    <main>
+
+        <!-- ========== HOME SECTION ========== -->
+        <section id="home" class="section">
+            <div id="home-container">
+                <div id="home-content">
+                    <h1>
+                        Welcome to the
+                        <span>Productivity Hub</span>
+                    </h1>
+                    <!-- A motivational quote. italic styling applied in CSS. -->
+                    <p id="quote">
+                        "You're allowed to have a day off. You're just not allowed to move in and live there."
+                    </p>
+                    <div id="get-started">
+                        <!-- Clicking this triggers the nav-highlight animation in JS -->
+                        <button id="start-btn">Get Started</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========== TO-DO SECTION ========== -->
+        <section id="to-do" class="section">
+
+            <!-- Wrapper splits the section in̥to LEFT and RIGHT panels using Flexbox -->
+            <div id="todo-wrapper">
+
+                <!-- ===== LEFT PANEL =====
+                     Contains: heading, task input form, and progress card.
+                     It's "sticky" on desktop so it stays visible while you scroll the right panel. -->
+                <div id="todo-left">
+
+                    <!-- Section heading -->
+                    <div id="todo-heading">
+                        <h2>TO-DO</h2>
+                        <p>Organize your day and stay productive.</p>
+                    </div>
+
+                    <!-- Task input area -->
+                    <div id="task-input-box">
+
+                        <!-- Task title: short single-line text -->
+                        <input
+                            type="text"
+                            id="task-title"
+                            placeholder="Enter your task..."
+                        >
+
+                        <!-- Task notes: multi-line text area for extra details -->
+                        <textarea
+                            id="task-notes"
+                            placeholder="Add additional notes..."
+                        ></textarea>
+
+                        <!-- Row of checkboxes + add button -->
+                        <div id="task-options">
+
+                            <!-- "Mark Important" checkbox.
+                                 The <label> wraps the input so clicking the text also toggles the checkbox. -->
+                            <label class="option-label">
+                                <input type="checkbox" id="important-task">
+                                Mark Important
+                             </label>
+
+                            <!-- "Star" checkbox -->
+                            <label class="option-label">
+                                <input type="checkbox" id="star-task">
+                                Mark ⭐
+                            </label>
+
+                            <!-- The + button that creates a new task card -->
+                            <button id="add-task-btn">+</button>
+
+                        </div>
+                    </div>
+
+                    <!-- Progress card: shows completed vs total tasks -->
+                    <div id="progress-card">
+                        <h3>Today's Progress</h3>
+                        <!-- JS updates this text dynamically, e.g. "Completed 2 / 5 Tasks" -->
+                        <p id="progress-text"></p>
+                        <!-- Progress bar container. The inner div's width is set by JS. -->
+                        <div id="progress-bar">
+                            <div id="progress-fill"></div>
+                        </div>
+                        <!-- Motivational message. JS swaps the text based on progress %. -->
+                        <div id="progress-message">
+                            Get Started by Adding Your First Task!
+                        </div>
+                    </div>
+
+                </div><!-- end #todo-left -->
+
+
+                <!-- ===== RIGHT PANEL =====
+                     This is where dynamically created task cards appear.
+                     JS prepends new cards here. -->
+                <div id="todo-right">
+                    <div id="task-list">
+
+                        <!-- Empty state: shown when no tasks exist.
+                             JS hides this once a task is added. -->
+                        <div id="empty-state">
+                            <h2>No Tasks Yet</h2>
+                            <p>Add your first task and begin building momentum.</p>
+                        </div>
+
+                        <!-- Task cards are injected here by JavaScript -->
+
+                    </div>
+                </div><!-- end #todo-right -->
+
+            </div><!-- end #todo-wrapper -->
+
+        </section>
+
+
+        <!-- ========== PLANNER SECTION (under construction) ========== -->
+        <section id="planner" class="section">
+            <div id="planner-content">
+                <h2>#under_construction</h2>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script goes at the bottom of <body> so the HTML is fully loaded before JS runs.
+         If you put this in <head>, JS would try to grab elements that don't exist yet. -->
+    <script src="app.js"></script>
+
+</body>
+</html>
