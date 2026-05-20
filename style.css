@@ -1,0 +1,969 @@
+/* ================================================================
+   PRODUCTIVITY HUB — style.css
+   ================================================================
+   WHY THIS FILE IS ORGANIZED THIS WAY:
+   Top → global reset & variables
+   Then → shared/reusable styles
+   Then → section-by-section styles (home, navbar, todo, etc.)
+   Bottom → all media queries in ONE place (not scattered everywhere)
+
+   This structure means you always know WHERE to look for something.
+================================================================ */
+
+
+/* ================================================================
+   1. CSS CUSTOM PROPERTIES (VARIABLES)
+   ================================================================
+   WHY: Instead of typing #1f1f1f or #edc9ad everywhere,
+   we define them ONCE here. If you ever want to change the
+   accent color, you change it in ONE place, not 30+ places.
+
+   Think of :root like a "settings" block for your entire stylesheet.
+================================================================ */
+
+:root {
+    /* --- Color Palette --- */
+    --color-bg:        #edc9ad;   /* warm peach — main page background */
+    --color-dark:      #1f1f1f;   /* near-black — navbar, buttons, text */
+    --color-surface:   #2b2b2b;   /* slightly lighter dark — card backgrounds */
+    --color-light:     #f4f4f4;   /* off-white — text on dark backgrounds */
+    --color-muted:     #d6d6d6;   /* gray — secondary text */
+    --color-accent:    #edc9ad;   /* same as bg, used as highlight on dark surfaces */
+    --color-green:     rgb(3, 146, 3); /* progress fill, completed button */
+    --color-danger:    crimson;   /* delete button */
+
+    /* --- Spacing --- */
+    --radius-card:  20px;   /* rounded corners on cards */
+    --radius-sm:    12px;   /* rounded corners on inputs */
+    --radius-btn:   10px;   /* rounded corners on buttons */
+
+    /* --- Shadows --- */
+    --shadow-card:  0 8px 20px rgba(0, 0, 0, 0.25);
+    --shadow-btn:   0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-nav:   0 2px 10px rgba(0, 0, 0, 0.5);
+
+    /* --- Transitions --- */
+    --transition-fast:   0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow:   0.4s ease;
+}
+
+
+/* ================================================================
+   2. RESET
+   ================================================================
+   WHY: Browsers have their own default styles (margins, padding, etc.)
+   that differ between Chrome, Firefox, and Safari. This reset clears
+   all of them so we start with a blank, consistent slate.
+================================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* WHY box-sizing: border-box?
+       By default, if you set width: 200px and add padding: 20px,
+       the total width becomes 240px — that's unexpected.
+       border-box makes padding COUNT INSIDE the width, not add to it.
+       So a 200px box stays 200px, no matter the padding. */
+}
+
+html {
+    /* Makes anchor links (#home, #to-do) scroll smoothly instead of jumping */
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                 Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    /* WHY this long font stack?
+       We try system-ui first (the OS's native font), then fall back
+       down the list if it's not available. This gives a clean,
+       native feel on every device without loading a custom font. */
+
+    background-color: var(--color-bg);
+    color: var(--color-light);
+
+    /* Prevent accidental text selection on the whole page.
+       We ONLY re-enable it on inputs below — see #task-title, #task-notes. */
+    user-select: none;
+}
+
+/* Re-enable text selection inside input fields and textareas.
+   WHY: The global user-select: none above blocks users from
+   selecting text they typed. That would be infuriating.
+   We override it only where selection actually makes sense. */
+input,
+textarea {
+    user-select: text;
+}
+
+/* Anchor tags: removes the default underline and blue color */
+a {
+    display: inline-block;       /* allows transform (used in hover) */
+    text-decoration: none;
+    color: var(--color-light);
+    font-size: 1.2rem;
+    font-weight: 200;
+    transition: var(--transition-slow);
+}
+
+a:hover {
+    color: var(--color-accent);
+    /* text-decoration shorthand: style, thickness, color */
+    text-decoration: underline 1px solid var(--color-accent);
+    text-underline-offset: 6px;  /* gap between text and underline */
+    transform: translateY(-4px); /* subtle lift on hover */
+}
+
+
+/* ================================================================
+   3. SHARED / REUSABLE STYLES
+   ================================================================
+   Styles that apply to multiple elements go here, not repeated
+   inside each section's block.
+================================================================ */
+
+/* Every section takes up at least the full viewport height */
+.section {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* ================================================================
+   4. NAVBAR
+   ================================================================ */
+
+#navbar {
+    width: 100%;
+    height: 70px;
+    background-color: var(--color-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 60px;
+
+    /* fixed: stays at top even while scrolling */
+    position: fixed;
+    top: 0;
+    z-index: 1000; /* sits on top of all other elements */
+
+    box-shadow: var(--shadow-nav);
+    /* transition on transform: used for the hide-on-scroll animation */
+    transition: transform var(--transition-slow);
+}
+
+/* Class added by JS when user scrolls down — slides navbar out of view */
+.nav-hidden {
+    transform: translateY(-100%); /* moves the navbar fully off-screen upward */
+}
+
+#logo {
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-light);
+}
+
+.nav-links {
+    margin-right: 50px;
+    display: flex;
+    gap: 65px;
+}
+
+/* ---- Nav Highlight Animation ----
+   Triggered by JS when "Get Started" is clicked.
+   Bounces the To-Do and Planner links to draw the user's eye. */
+
+.nav-highlight {
+    animation: navBounce 0.8s ease;
+    background-color: var(--color-accent);
+    color: var(--color-dark) !important; /* override the default link color */
+    padding: 8px 4px;
+}
+
+@keyframes navBounce {
+    /* Double bounce effect: big jump, small jump, settle */
+    0%   { transform: translateY(0); }
+    25%  { transform: translateY(-10px); }
+    50%  { transform: translateY(0); }
+    75%  { transform: translateY(-5px); }
+    100% { transform: translateY(0); }
+}
+
+/* ---- Hamburger Toggle Button ----
+   Hidden on desktop (display: none).
+   Shown on mobile via media query below. */
+#menu-toggle {
+    display: none; /* only visible on screens ≤768px */
+    width: 46px;
+    height: 46px;
+    border: none;
+    outline: none;
+    background: transparent;
+    cursor: pointer;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    padding: 0;
+}
+
+/* The three lines of the hamburger icon */
+#menu-toggle span {
+    display: block;
+    width: 28px;
+    height: 2px;
+    background-color: var(--color-light);
+    border-radius: 999px;
+    /* transition lets us animate them into an X shape */
+    transition: transform var(--transition-normal),
+                opacity var(--transition-normal),
+                background-color var(--transition-normal);
+}
+
+/* When .menu-open is on #navbar, animate the 3 lines into an X */
+#navbar.menu-open #menu-toggle span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);  /* top line: down + rotate */
+}
+#navbar.menu-open #menu-toggle span:nth-child(2) {
+    opacity: 0; /* middle line: fade out */
+}
+#navbar.menu-open #menu-toggle span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg); /* bottom line: up + rotate */
+}
+
+
+/* ================================================================
+   5. HOME SECTION
+   ================================================================ */
+
+#home-container {
+    width: min(100%, 1100px);
+    /* min() picks the SMALLER value: full width on small screens,
+       capped at 1100px on large screens. Prevents content from
+       stretching too wide on 4K displays. */
+    padding: 120px 60px 80px; /* top padding accounts for the 70px navbar */
+}
+
+#home-content {
+    max-width: 900px;
+    margin: 0 auto;  /* centers the content block horizontally */
+    text-align: center;
+}
+
+#home h1 {
+    color: var(--color-dark);
+    font-size: 4rem;
+    font-weight: 700;
+}
+
+/* The highlighted "Productivity Hub" span inside h1 */
+#home h1 span {
+    background-color: var(--color-dark);
+    color: var(--color-accent);
+    font-size: 5rem;
+    transition: 0.5s ease;
+}
+
+#home h1 span:hover {
+    background-color: var(--color-light);
+    color: var(--color-dark);
+    cursor: pointer;
+}
+
+#home p {
+    color: var(--color-dark);
+    margin-top: 20px;
+    font-size: 1.4rem;
+    font-weight: 300;
+    text-align: center;
+}
+
+#home #quote {
+    font-style: italic; /* makes the motivational quote appear in italics */
+}
+
+#home #get-started {
+    text-align: center;
+    margin-top: 80px;
+}
+
+/* "Get Started" button */
+#start-btn {
+    background-color: var(--color-dark);
+    color: var(--color-light);
+    border: none;
+    outline: none;
+    padding: 16px 34px;
+    font-size: 2rem;
+    font-weight: 200;
+    letter-spacing: 1px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: var(--shadow-btn);
+}
+
+#start-btn:hover {
+    background-color: var(--color-light);
+    color: var(--color-dark);
+    transform: translateY(-4px) scale(1.03); /* lift + slight grow */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+#start-btn:active {
+    transform: scale(0.95); /* press-down effect on click */
+}
+
+
+/* ================================================================
+   6. TO-DO SECTION
+   ================================================================ */
+
+#to-do {
+    background-color: var(--color-dark);
+    padding: 40px 50px;
+    /* WHY override .section alignment?
+       The to-do section needs content at the top, not centered,
+       because it can be taller than the screen. */
+    align-items: flex-start;
+}
+
+/* ---- Layout Wrapper (Left + Right panels side by side) ---- */
+#todo-wrapper {
+    width: 100%;
+    max-width: 1400px;
+    display: flex;
+    gap: 40px;
+    align-items: flex-start; /* panels align to their tops, not vertically centered */
+}
+
+/* ---- Left Panel ---- */
+#todo-left {
+    flex: 1; /* takes equal share of the available width */
+    /* sticky: panel stays visible as you scroll the right panel.
+       top: 90px accounts for the 70px navbar + a bit of breathing room. */
+    position: sticky;
+    top: 90px;
+    align-self: flex-start; /* required for sticky to work inside a flex container */
+}
+
+/* ---- Right Panel ---- */
+#todo-right {
+    flex: 1.2; /* slightly wider than the left panel */
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* ---- Section Heading ---- */
+#todo-heading {
+    margin-bottom: 20px;
+}
+
+#todo-heading h2 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--color-light);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+#todo-heading p {
+    color: var(--color-muted);
+    font-size: 1rem;
+}
+
+/* ---- Task Input Box ---- */
+#task-input-box {
+    background-color: var(--color-surface);
+    padding: 24px;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+}
+
+/* Shared styles for the title input and notes textarea */
+#task-title,
+#task-notes {
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 18px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-light);
+    color: var(--color-dark);
+    font-size: 1rem;
+    margin-bottom: 20px;
+    transition: var(--transition-normal);
+}
+
+/* Prevents the textarea from being dragged to a weird size */
+#task-notes {
+    min-height: 120px;
+    resize: none;
+}
+
+/* Blue glow-ring when user clicks into an input field */
+#task-title:focus,
+#task-notes:focus {
+    box-shadow: 0 0 0 3px rgba(237, 201, 173, 0.4);
+}
+
+/* Row containing the two checkboxes and the + button */
+#task-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Each checkbox + its label text */
+.option-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-light);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.option-label input[type="checkbox"] {
+    cursor: pointer;
+}
+
+/* The circular + button that adds a new task */
+#add-task-btn {
+    width: 60px;
+    height: 60px;
+    border: none;
+    outline: none;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    color: var(--color-dark);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+#add-task-btn:hover {
+    transform: scale(1.1);
+    background-color: var(--color-light);
+}
+
+#add-task-btn:active {
+    transform: scale(0.95);
+    background-color: var(--color-accent);
+}
+
+/* ---- Progress Card ---- */
+#progress-card {
+    background-color: var(--color-surface);
+    margin-top: 25px;
+    padding: 30px;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+}
+
+#progress-card h3 {
+    color: var(--color-light);
+    font-size: 2rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+#progress-text {
+    color: var(--color-light);
+    margin-bottom: 20px;
+}
+
+/* The outer gray track of the progress bar */
+#progress-bar {
+    width: 100%;
+    height: 18px;
+    background-color: #444;
+    border-radius: 30px;
+    overflow: hidden; /* clips the green fill so it doesn't poke outside the track */
+    margin-bottom: 25px;
+}
+
+/* The green fill inside the progress bar.
+   width is set dynamically by JS (e.g., style.width = "60%") */
+#progress-fill {
+    width: 0%;         /* starts empty */
+    height: 100%;
+    background-color: var(--color-green);
+    transition: width var(--transition-slow); /* smooth fill animation */
+    border-radius: 30px;
+}
+
+#progress-message {
+    color: var(--color-light);
+    line-height: 1.7;
+}
+
+/* ---- Task List (right panel) ---- */
+#task-list {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* When the list is empty, let the placeholder sit in the vertical middle. */
+#task-list.is-empty {
+    flex: 1;
+    justify-content: center;
+}
+
+/* ---- Empty State ---- */
+#empty-state {
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-card);
+    padding: 40px;
+    color: var(--color-muted);
+}
+
+#empty-state h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--color-light);
+}
+
+#empty-state p {
+    line-height: 1.3;
+    max-width: 350px;
+}
+
+/* ---- Task Card ---- */
+.task-card {
+    background-color: var(--color-surface);
+    padding: 25px;
+    border-radius: 18px;
+    /* opacity + transform transitions enable the appear/disappear animations */
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.task-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Completed cards don't lift on hover — they're done, leave them alone */
+.task-card.completed-task:hover {
+    transform: none;
+}
+
+/* --- Task Animation States (controlled by JS) ---
+   JS adds/removes these classes to trigger CSS transitions. */
+
+/* task-hidden: new card starts invisible and shifted down, then class is removed */
+.task-hidden {
+    opacity: 0;
+    transform: translateY(150px);
+}
+
+/* task-removing: card fades out to the right before being removed from DOM */
+.task-removing {
+    opacity: 0;
+    transform: translateX(40px);
+}
+
+/* task-completing: brief fade+shrink before card moves to the bottom of the list */
+.task-completing {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+/* When a task is marked complete: fade out its content visually */
+.completed-task h3,
+.completed-task p,
+.completed-task .task-tags {
+    opacity: 0.45;
+}
+
+/* ---- Task Card Layout ---- */
+
+/* Top row: task title on the left, tags on the right */
+.task-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.task-top h3 {
+    color: var(--color-light);
+    font-size: 1.3rem;
+}
+
+/* Container for Important + Star tags */
+.task-tags {
+    display: flex;
+    gap: 10px;
+}
+
+/* "Important" badge tag */
+.important-tag {
+    background-color: var(--color-accent);
+    color: var(--color-dark);
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.star-tag {
+    font-size: 1.2rem;
+}
+
+/* Task notes / body text */
+.task-card p {
+    color: var(--color-muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* Row of Complete + Delete buttons at the bottom of each card */
+.task-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+/* Shared button base styles */
+.complete-btn,
+.delete-btn {
+    border: none;
+    outline: none;
+    padding: 12px 18px;
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+/* Complete button — uses accent color */
+.complete-btn {
+    background-color: var(--color-accent);
+    color: var(--color-dark);
+}
+
+.complete-btn:hover {
+    background-color: var(--color-light);
+    color: var(--color-dark);
+    transform: translateY(-3px);
+}
+
+.complete-btn:active {
+    transform: scale(0.95);
+    background-color: var(--color-accent);
+}
+
+/* Delete button — red to signal danger/destructive action */
+.delete-btn {
+    background-color: var(--color-danger);
+    color: var(--color-light);
+}
+
+.delete-btn:hover {
+    background-color: var(--color-light);
+    color: var(--color-danger);
+    transform: translateY(-3px);
+}
+
+.delete-btn:active {
+    transform: scale(0.95);
+    background-color: var(--color-danger);
+    color: var(--color-light);
+}
+
+/* The non-clickable "Completed ✓" button that replaces Complete after task is done */
+.completed-btn {
+    background-color: var(--color-green);
+    color: var(--color-light);
+    border: none;
+    outline: none;
+    padding: 12px 18px;
+    border-radius: var(--radius-btn);
+    cursor: default; /* default cursor = not clickable */
+}
+
+
+/* ================================================================
+   7. PLANNER SECTION (placeholder)
+================================================================ */
+
+#planner-content {
+    color: var(--color-dark);
+    font-size: 2rem;
+}
+
+
+/* ================================================================
+   8. MEDIA QUERIES
+   ================================================================
+   WHY all media queries at the bottom in ONE block?
+   Scattered media queries (like in your original code) make it
+   a nightmare to track down what changes at what breakpoint.
+   Keeping them together means one quick scroll shows you the
+   entire responsive behavior of the site.
+
+   ORDER: largest first → smallest last
+   (or you can go smallest-first / "mobile-first" — either is fine,
+   just be CONSISTENT. Here we use desktop-first.)
+================================================================ */
+
+/* ---- Tablets and smaller desktops (≤1024px) ---- */
+@media (max-width: 1024px) {
+
+    #navbar {
+        padding: 0 28px;
+    }
+
+    #logo {
+        font-size: 1.45rem;
+    }
+
+    .nav-links {
+        gap: 30px;
+        margin-right: 0;
+    }
+
+    a {
+        font-size: 1rem;
+    }
+
+    #home-container {
+        padding: 110px 28px 70px;
+    }
+
+    #home h1 {
+        font-size: 3rem;
+    }
+
+    #home h1 span {
+        font-size: 3.8rem;
+    }
+
+    #home p {
+        font-size: 1.15rem;
+        max-width: 680px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #start-btn {
+        font-size: 1.5rem;
+        padding: 14px 28px;
+    }
+}
+
+/* ---- Medium screens: prevent the headline from wrapping awkwardly (800px–1900px) ---- */
+@media (min-width: 800px) and (max-width: 1900px) {
+
+    #home h1 {
+        white-space: nowrap; /* forces headline onto one line */
+        font-size: 2.8rem;
+    }
+
+    #home h1 span {
+        display: inline-block;
+        font-size: 3.2rem;
+        padding: 0.08em 0.36em;
+    }
+}
+
+/* ---- Small tablets (≤900px): stack the two-column todo layout ---- */
+@media (max-width: 900px) {
+
+    /* Stack left and right panels vertically instead of side-by-side */
+    #todo-wrapper {
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    /* Remove sticky positioning when stacked — it looks weird */
+    #todo-left,
+    #todo-right {
+        position: static;
+        width: 100%;
+    }
+
+    /* Let checkboxes wrap to the next line if they don't fit */
+    #task-options {
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    /* Stack title above tags on small cards */
+    .task-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    /* Keep Complete + Delete buttons side-by-side but make them stretch */
+    .task-buttons {
+        flex-wrap: nowrap;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .complete-btn,
+    .delete-btn {
+        flex: 1;          /* each button takes equal share of the row */
+        min-width: 0;     /* allows flex items to shrink below their content width */
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ---- Mobile phones (≤768px) ---- */
+@media (max-width: 768px) {
+
+    /* ----- Navbar ----- */
+    #navbar {
+        padding: 0 18px;
+        height: 64px;
+    }
+
+    /* Show the hamburger button on mobile */
+    #menu-toggle {
+        display: flex;
+    }
+
+    /* Transform nav-links into a full-width dropdown menu */
+    .nav-links {
+        /* Take the links out of normal flow and position them
+           directly below the navbar */
+        position: absolute;
+        top: 64px; /* same as navbar height */
+        left: 0;
+        right: 0;
+        margin-right: 0;
+
+        display: none; /* hidden by default; shown when .menu-open is added */
+        flex-direction: column; /* stack links vertically */
+        gap: 0;
+
+        background-color: var(--color-dark);
+        padding: 10px 0 16px;
+        border-top: 1px solid rgba(244, 244, 244, 0.08);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    /* JS adds .menu-open to #navbar — this makes nav-links visible */
+    #navbar.menu-open .nav-links {
+        display: flex;
+    }
+
+    .nav-links a {
+        width: 100%;
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+
+    /* ----- Home Section ----- */
+    #home-container {
+        padding: 104px 18px 60px;
+    }
+
+    #home-content {
+        max-width: 100%;
+    }
+
+    #home h1 {
+        font-size: 2.35rem;
+        line-height: 1.1;
+    }
+
+    #home h1 span {
+        display: inline-block;
+        font-size: 2.9rem;
+        margin-top: 6px;
+    }
+
+    #home p {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-top: 16px;
+    }
+
+    #home #get-started {
+        margin-top: 44px;
+    }
+
+    #start-btn {
+        font-size: 1.2rem;
+        padding: 12px 24px;
+        border-radius: 12px;
+    }
+
+    /* ----- To-Do Section ----- */
+    #to-do {
+        padding: 28px 18px 36px;
+    }
+
+    /* Reduce card border-radius slightly on small screens */
+    #task-input-box,
+    #progress-card,
+    #empty-state,
+    .task-card {
+        border-radius: 16px;
+        padding: 20px;
+    }
+
+    #task-list {
+        gap: 18px;
+    }
+
+    .task-buttons {
+        gap: 8px;
+    }
+
+    .complete-btn,
+    .delete-btn {
+        padding: 9px 10px;
+        font-size: 0.82rem;
+        border-radius: 8px;
+    }
+}
+
+/* ---- Very small phones (≤520px) ---- */
+@media (max-width: 520px) {
+
+    #logo {
+        font-size: 1.2rem;
+    }
+
+    #home h1 {
+        font-size: 2rem;
+    }
+
+    #home h1 span {
+        font-size: 2.4rem;
+    }
+
+    #home p {
+        font-size: 0.95rem;
+    }
+
+    /* Make the button full-width on tiny screens */
+    #start-btn {
+        width: 100%;
+        max-width: 260px;
+        font-size: 1.05rem;
+    }
+}
