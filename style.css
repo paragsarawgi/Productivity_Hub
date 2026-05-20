@@ -839,9 +839,21 @@ a:hover {
         height: 64px;
     }
 
+    #logo {
+        min-width: 0;
+        font-size: 1.05rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 10px;
+    }
+
     /* Show the hamburger button on mobile */
     #menu-toggle {
         display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
     }
 
     /* Transform nav-links into a full-width dropdown menu */
@@ -885,14 +897,20 @@ a:hover {
     }
 
     #home h1 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         font-size: 2.35rem;
         line-height: 1.1;
+        text-align: center;
     }
 
     #home h1 span {
         display: inline-block;
         font-size: 2.9rem;
         margin-top: 6px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     #home p {
@@ -913,7 +931,13 @@ a:hover {
 
     /* ----- To-Do Section ----- */
     #to-do {
-        padding: 28px 18px 36px;
+        padding: 28px 0 36px;
+    }
+
+    #todo-wrapper {
+        width: 100%;
+        max-width: none;
+        padding: 0 14px;
     }
 
     /* Reduce card border-radius slightly on small screens */
@@ -945,15 +969,16 @@ a:hover {
 @media (max-width: 520px) {
 
     #logo {
-        font-size: 1.2rem;
+        font-size: 0.98rem;
+        max-width: calc(100vw - 96px);
     }
 
     #home h1 {
-        font-size: 2rem;
+        font-size: 1.85rem;
     }
 
     #home h1 span {
-        font-size: 2.4rem;
+        font-size: 2.2rem;
     }
 
     #home p {
@@ -965,5 +990,35 @@ a:hover {
         width: 100%;
         max-width: 260px;
         font-size: 1.05rem;
+    }
+
+    #to-do {
+        padding-top: 22px;
+    }
+
+    #todo-wrapper {
+        padding: 0 10px;
+        gap: 22px;
+    }
+
+    #task-input-box,
+    #progress-card,
+    #empty-state,
+    .task-card {
+        padding: 16px;
+    }
+
+    #planner-content {
+        width: 100%;
+        max-width: 100%;
+        padding: 0 18px;
+        text-align: center;
+    }
+
+    #planner-content h2 {
+        font-size: 1.7rem;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
 }
