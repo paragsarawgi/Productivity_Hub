@@ -235,14 +235,14 @@ function updateProgress() {
 ================================================================ */
 
 /* ---- "Get Started" Button ---- */
-startBtn.addEventListener("click", function () {
-    todoLink.classList.add("nav-highlight");
-    plannerLink.classList.add("nav-highlight");
-    setTimeout(function () {
-        todoLink.classList.remove("nav-highlight");
-        plannerLink.classList.remove("nav-highlight");
-    }, 1000);
-});
+// startBtn.addEventListener("click", function () {
+//     todoLink.classList.add("nav-highlight");
+//     plannerLink.classList.add("nav-highlight");
+//     setTimeout(function () {
+//         todoLink.classList.remove("nav-highlight");
+//         plannerLink.classList.remove("nav-highlight");
+//     }, 1000);
+// });
 
 /* ---- Hamburger Menu Toggle ---- */
 menuToggle.addEventListener("click", function () {
